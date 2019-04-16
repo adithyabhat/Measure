@@ -13,8 +13,9 @@ class LineNode: SCNNode {
     
     let lineThickness = CGFloat(0.001)
     let radius = CGFloat(0.1)
-    var lineGeometry: SCNGeometry?
-    
+    private var boxGeometry: SCNBox!
+    private var nodeLine: SCNNode!
+
     init(from vectorA: SCNVector3, to vectorB: SCNVector3, lineColor color: UIColor, lineWidth width: CGFloat) {
         super.init()
         
@@ -24,13 +25,12 @@ class LineNode: SCNNode {
         nodeZAlign.eulerAngles.x = Float.pi/2
         
         let height = self.distance(from: vectorA, to: vectorB)
-        let box = SCNBox(width: width, height: height, length: lineThickness, chamferRadius: radius)
+        boxGeometry = SCNBox(width: width, height: height, length: lineThickness, chamferRadius: radius)
         let material = SCNMaterial()
         material.diffuse.contents = color
-        box.materials = [material]
-        lineGeometry = box
+        boxGeometry.materials = [material]
         
-        let nodeLine = SCNNode(geometry: box)
+        let nodeLine = SCNNode(geometry: boxGeometry)
         nodeLine.position.y = Float(-height/2) + 0.001
         nodeZAlign.addChildNode(nodeLine)
         
@@ -52,5 +52,22 @@ class LineNode: SCNNode {
                 (vectorA.x - vectorB.x) * (vectorA.x - vectorB.x) +
                     (vectorA.y - vectorB.y) * (vectorA.y - vectorB.y) +
                     (vectorA.z - vectorB.z) * (vectorA.z - vectorB.z)))
+    }
+    
+    func updateNode(vectorA: SCNVector3? = nil, vectorB: SCNVector3? = nil, color: UIColor?) {
+        if let vectorA = vectorA, let vectorB = vectorB {
+            let height = self.distance(from: vectorA, to: vectorB)
+            boxGeometry.height = height
+            nodeLine.position.y = Float(-height/2) + 0.001
+            
+            let orientationNode = SCNNode()
+            orientationNode.position = vectorB
+            self.constraints = [SCNLookAtConstraint(target: orientationNode)]
+        }
+        if let color = color {
+            let material = SCNMaterial()
+            material.diffuse.contents = color
+            boxGeometry.materials = [material]
+        }
     }
 }

@@ -120,14 +120,12 @@ extension DistanceMeasureViewController: ARSCNViewDelegate {
         if let realTimeLineNode = self.realTimeLineNode,
             let hitResultPosition = sceneView.hitResult(forPoint: screenCenterPoint),
             let startNode = distanceNodes.firstObject as? SCNNode {
-            realTimeLineNode.removeFromParentNode()
-            let realTimeLine = LineNode(from: startNode.position,
-                                        to: hitResultPosition,
-                                        lineColor: self.nodeColor,
-                                        lineWidth: self.lineWidth)
-            realTimeLine.name = self.realTimeLineName
-            self.realTimeLineNode = realTimeLine
-            self.sceneView.scene.rootNode.addChildNode(realTimeLine)
+            realTimeLineNode.updateNode(vectorA: startNode.position, vectorB: hitResultPosition, color: nil)
+            
+            let distance = sceneView.distance(betweenPoints: startNode.position, point2: hitResultPosition)
+            DispatchQueue.main.async { [unowned self] in
+                self.lengthLabel.text = String(format: "%.2fm", distance)
+            }
         }
     }
     

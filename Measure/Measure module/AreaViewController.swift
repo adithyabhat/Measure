@@ -177,14 +177,14 @@ extension AreaViewController: ARSCNViewDelegate {
         if let realTimeLineNode = self.realTimeLineNode,
             let hitResultPosition = sceneView.hitResult(forPoint: screenCenterPoint),
             let startNode = self.nodesList(forState: self.currentState).firstObject as? SCNNode {
-            realTimeLineNode.removeFromParentNode()
-            let realTimeLine = LineNode(from: startNode.position,
-                                        to: hitResultPosition,
-                                        lineColor: self.nodeColor,
-                                        lineWidth: self.lineWidth)
-            realTimeLine.name = self.realTimeLineName
-            self.realTimeLineNode = realTimeLine
-            self.sceneView.scene.rootNode.addChildNode(realTimeLine)
+            realTimeLineNode.updateNode(vectorA: startNode.position, vectorB: hitResultPosition, color: nil)
+            
+            let distance = sceneView.distance(betweenPoints: startNode.position, point2: hitResultPosition)
+            let label = currentState == .lengthCalc ? lengthLabel : breadthLabel
+            DispatchQueue.main.async { [unowned self] in
+                label?.text = String(format: "%.2fm", distance)
+                label?.textColor = self.nodeColor
+            }
         }
     }
     
